@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Home Page</title>
+  <style>
+    body {
+      background: black;
+      color: green;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      overflow-x: hidden; /* prevent scroll bar from animation */
+    }
+
+    h1, p {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    /* JOURNAL STYLES */
+    .journal-box {
+      width: 80%;
+      max-width: 900px;
+      margin: 40px auto 20px auto;
+    }
+
+    .journal-box h2 {
+      color: lime;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .journal-box textarea {
+      width: 100%;
+      min-height: 150px;
+      max-height: 70vh;
+      background: #000;
+      color: lime;
+      border: 2px solid lime;
+      padding: 10px;
+      font-size: 16px;
+      resize: none;          /* we will auto-resize with JS */
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    .journal-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .journal-buttons button {
+      flex: 1;
+      min-width: 120px;
+      padding: 10px;
+      background: lime;
+      color: black;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .journal-buttons button:hover {
+      filter: brightness(1.2);
+    }
+
+    /* Entries list */
+    .entries-container {
+      width: 80%;
+      max-width: 900px;
+      margin: 20px auto 80px auto;
+      border-top: 1px solid #0f0;
+      padding-top: 15px;
+    }
+
+    .entries-container h3 {
+      margin-bottom: 10px;
+      color: lime;
+    }
+
+    .entry {
+      border: 1px solid #0f0;
+      padding: 10px;
+      margin-bottom: 10px;
+      background: #050505;
+      white-space: pre-wrap; /* keep line breaks */
+    }
+
+    .entry-header {
+      font-size: 12px;
+      color: #7fff7f;
+      margin-bottom: 5px;
+    }
+
+    /* Stickman runner container */
+    .stickman-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 2vw;              /* ~2% of page width */
+      height: auto;
+      z-index: 9999;
+      animation: runAndJump 5s linear infinite;
+    }
+
+    .stickman {
+      width: 100%;
+      height: auto;
+    }
+
+    /* Obstacle box */
+    .obstacle {
+      position: fixed;
+      bottom: 0;
+      left: 50vw;              /* middle of the screen */
+      width: 4vw;
+      height: 4vh;
+      border: 2px solid lime;
+      box-sizing: border-box;
+      z-index: 9998;
+    }
+
+    /* Animation: move left → right and jump over the box */
+    @keyframes runAndJump {
+      0%   { transform: translate(-10vw, 0); }
+      30%  { transform: translate(20vw, 0); }
+      45%  { transform: translate(45vw, 0); }       /* closer to the box */
+      52%  { transform: translate(52vw, -8vh); }    /* start jump */
+      60%  { transform: translate(60vw, -10vh); }   /* jump peak */
+      68%  { transform: translate(68vw, -5vh); }    /* landing */
+      80%  { transform: translate(80vw, 0); }
+      100% { transform: translate(110vw, 0); }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>The daily box</h1>
+  <p>This is my secret Journal.</p>
+
+  <!-- JOURNAL AREA -->
+  <div class="journal-box">
+    <h2>Your Journal</h2>
+    <textarea id="journalInput" placeholder="If you were wondering this is where you type..."></textarea>
+
+    <div class="journal-buttons">
+      <button id="saveBtn">Save Entry</button>
+      <button id="loadBtn">Show old stuff</button>
+      <button id="clearBtn">Bye Bye Entries</button>
+    </div>
+  </div>
+
+  <!-- SAVED ENTRIES LIST -->
+  <div class="entries-container">
+    <h3>Previous Entries</h3>
+    <div id="entriesList"></div>
+  </div>
+
+  <!-- Stickman runner -->
+  <div class="stickman-container">
+    <svg class="stickman" viewBox="0 0 50 100">
+      <!-- Head -->
+      <circle cx="25" cy="15" r="10" stroke="lime" fill="none" stroke-width="3"/>
+      <!-- Body -->
+      <line x1="25" y1="25" x2="25" y2="60" stroke="lime" stroke-width="3"/>
+      <!-- Arms -->
+      <line x1="25" y1="35" x2="10" y2="50" stroke="lime" stroke-width="3"/>
+      <line x1="25" y1="35" x2="40" y2="50" stroke="lime" stroke-width="3"/>
+      <!-- Legs -->
+      <line x1="25" y1="60" x2="15" y2="90" stroke="lime" stroke-width="3"/>
+      <line x1="25" y1="60" x2="35" y2="90" stroke="lime" stroke-width="3"/>
+    </svg>
+  </div>
+
+  <!-- Obstacle box -->
+  <div class="obstacle"></div>
+
+  <script>
+    const textarea = document.getElementById('journalInput');
+    const saveBtn = document.getElementById('saveBtn');
+    const loadBtn = document.getElementById('loadBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const entriesList = document.getElementById('entriesList');
+
+    const STORAGE_KEY = 'journalEntries';
+
+    // Auto-expand textarea as you type
+    function autoResize() {
+      textarea.style.height = 'auto';
+      textarea.style.height = textarea.scrollHeight + 'px';
+    }
+    textarea.addEventListener('input', autoResize);
+
+    // Load entries from localStorage
+    function loadEntries() {
+      entriesList.innerHTML = ''; // clear current display
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (!stored) return;
+
+      const entries = JSON.parse(stored);
+      entries.forEach(entry => {
+        const div = document.createElement('div');
+        div.className = 'entry';
+
+        const header = document.createElement('div');
+        header.className = 'entry-header';
+        header.textContent = entry.date;
+
+        const body = document.createElement('div');
+        body.textContent = entry.text;
+
+        div.appendChild(header);
+        div.appendChild(body);
+        entriesList.appendChild(div);
+      });
+    }
+
+    // Save a new entry
+    function saveEntry() {
+      const text = textarea.value.trim();
+      if (!text) {
+        alert('Write something before saving 🙂');
+        return;
+      }
+
+      const stored = localStorage.getItem(STORAGE_KEY);
+      const entries = stored ? JSON.parse(stored) : [];
+
+      const now = new Date();
+      const dateString = now.toLocaleString(); // includes date + time
+
+      entries.unshift({  // add to top
+        text,
+        date: dateString
+      });
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+
+      textarea.value = '';
+      autoResize();
+      loadEntries(); // refresh list
+    }
+
+    // Clear all entries
+    function clearEntries() {
+      const confirmClear = confirm('Delete ALL journal entries? This cannot be undone.');
+      if (!confirmClear) return;
+
+      localStorage.removeItem(STORAGE_KEY);
+      entriesList.innerHTML = '';
+    }
+
+    saveBtn.addEventListener('click', saveEntry);
+    loadBtn.addEventListener('click', loadEntries);
+    clearBtn.addEventListener('click', clearEntries);
+
+    // Initial setup
+    window.addEventListener('DOMContentLoaded', () => {
+      autoResize();
+      loadEntries();
+    });
+  </script>
+
+</body>
+</html>
