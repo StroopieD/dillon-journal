@@ -332,5 +332,43 @@
       input.focus();
     });
   </script>
+
+  <style>
+.falling-stickman-container {
+  position: fixed;
+  top: -20vh;              
+  left: 50%;               
+  width: 2vw;              
+  z-index: 9999;
+  animation: fallDown 4s linear forwards;
+}
+.falling-stickman-container .stickman {
+  width: 100%;
+  height: auto;
+}
+@keyframes fallDown {
+  0% {
+    transform: translate(-50%, -120vh);  
+  }
+  100% {
+    transform: translate(-50%, 110vh);   
+  }
+}
+  </style>
+  <div class="falling-stickman-container">
+  <svg class="stickman" viewBox="0 0 50 100">
+    <!-- Head -->
+    <circle cx="25" cy="15" r="10" stroke="lime" fill="none" stroke-width="3"/>
+    <!-- Body -->
+    <line x1="25" y1="25" x2="25" y2="60" stroke="lime" stroke-width="3"/>
+    <!-- Arms -->
+    <line x1="25" y1="35" x2="10" y2="50" stroke="lime" stroke-width="3"/>
+    <line x1="25" y1="35" x2="40" y2="50" stroke="lime" stroke-width="3"/>
+    <!-- Legs -->
+    <line x1="25" y1="60" x2="15" y2="90" stroke="lime" stroke-width="3"/>
+    <line x1="25" y1="60" x2="35" y2="90" stroke="lime" stroke-width="3"/>
+  </svg>
+</div>
+
 </body>
 </html>
