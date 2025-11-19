@@ -72,4 +72,3 @@ This was my first time deploying a real website publicly!
 - How to publish a site on GitHub Pages  
 - How localStorage works  
 - How to make CSS animations  
-- Ho
