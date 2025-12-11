@@ -93,7 +93,7 @@
       margin-bottom: 5px;
     }
 
-    /* Stickman runner container */
+    /* Stickman walker container */
     .stickman-container {
       position: fixed;
       bottom: 0;
@@ -101,7 +101,7 @@
       width: 2vw;              /* ~2% of page width */
       height: auto;
       z-index: 9999;
-      animation: runAndJump 5s linear infinite;
+      animation: walkAcross 8s linear infinite;
     }
 
     .stickman {
@@ -109,28 +109,33 @@
       height: auto;
     }
 
-    /* Obstacle box */
-    .obstacle {
-      position: fixed;
-      bottom: 0;
-      left: 50vw;              /* middle of the screen */
-      width: 4vw;
-      height: 4vh;
-      border: 2px solid lime;
-      box-sizing: border-box;
-      z-index: 9998;
+    /* Animation: walk from left to right */
+    @keyframes walkAcross {
+      0%   { transform: translateX(-10vw); }
+      100% { transform: translateX(110vw); }
     }
 
-    /* Animation: move left → right and jump over the box */
-    @keyframes runAndJump {
-      0%   { transform: translate(-10vw, 0); }
-      30%  { transform: translate(20vw, 0); }
-      45%  { transform: translate(45vw, 0); }       /* closer to the box */
-      52%  { transform: translate(52vw, -8vh); }    /* start jump */
-      60%  { transform: translate(60vw, -10vh); }   /* jump peak */
-      68%  { transform: translate(68vw, -5vh); }    /* landing */
-      80%  { transform: translate(80vw, 0); }
-      100% { transform: translate(110vw, 0); }
+    /* Animate the legs to create walking effect */
+    @keyframes walkLeftLeg {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-20deg); }
+      75% { transform: rotate(20deg); }
+    }
+
+    @keyframes walkRightLeg {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(20deg); }
+      75% { transform: rotate(-20deg); }
+    }
+
+    .stickman .left-leg {
+      animation: walkLeftLeg 0.6s linear infinite;
+      transform-origin: 25px 60px;
+    }
+
+    .stickman .right-leg {
+      animation: walkRightLeg 0.6s linear infinite;
+      transform-origin: 25px 60px;
     }
   </style>
 </head>
@@ -157,7 +162,7 @@
     <div id="entriesList"></div>
   </div>
 
-  <!-- Stickman runner -->
+  <!-- Stickman walker -->
   <div class="stickman-container">
     <svg class="stickman" viewBox="0 0 50 100">
       <!-- Head -->
@@ -167,14 +172,11 @@
       <!-- Arms -->
       <line x1="25" y1="35" x2="10" y2="50" stroke="lime" stroke-width="3"/>
       <line x1="25" y1="35" x2="40" y2="50" stroke="lime" stroke-width="3"/>
-      <!-- Legs -->
-      <line x1="25" y1="60" x2="15" y2="90" stroke="lime" stroke-width="3"/>
-      <line x1="25" y1="60" x2="35" y2="90" stroke="lime" stroke-width="3"/>
+      <!-- Legs with walking animation -->
+      <line class="left-leg" x1="25" y1="60" x2="15" y2="90" stroke="lime" stroke-width="3"/>
+      <line class="right-leg" x1="25" y1="60" x2="35" y2="90" stroke="lime" stroke-width="3"/>
     </svg>
   </div>
-
-  <!-- Obstacle box -->
-  <div class="obstacle"></div>
 
   <script>
     const textarea = document.getElementById('journalInput');
